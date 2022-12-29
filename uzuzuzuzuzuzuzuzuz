@@ -1,0 +1,145 @@
+if not game:IsLoaded() then 
+    game.Loaded:Wait()
+end
+
+local dwCamera = workspace.CurrentCamera
+local dwRunService = game:GetService("RunService")
+local dwUIS = game:GetService("UserInputService")
+local dwEntities = game:GetService("Players")
+local dwLocalPlayer = dwEntities.LocalPlayer
+local dwMouse = dwLocalPlayer:GetMouse()
+local sG = game:GetService("StarterGui")
+
+local settings = {
+    Aimbot = true,
+    Aiming = false,
+    Aimbot_AimPart = "HumanoidRootPart",
+    Aimbot_TeamCheck = false,
+    Aimbot_Draw_FOV = true,
+    Aimbot_FOV_Radius = 120,
+    Aimbot_FOV_Color = Color3.fromRGB(255,105,180)
+}
+
+local fovcircle = Drawing.new("Circle")
+fovcircle.Visible = settings.Aimbot_Draw_FOV
+fovcircle.Radius = settings.Aimbot_FOV_Radius
+fovcircle.Color = settings.Aimbot_FOV_Color
+fovcircle.Thickness = 1
+fovcircle.Filled = false
+fovcircle.Transparency = 1
+
+fovcircle.Position = Vector2.new(dwCamera.ViewportSize.X / 2, dwCamera.ViewportSize.Y / 2)
+
+dwUIS.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton2 then
+        settings.Aiming = true
+    end
+end)
+
+dwUIS.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton2 then
+        settings.Aiming = false
+    end
+end)
+
+dwRunService.RenderStepped:Connect(function()
+    
+    local dist = math.huge
+    local closest_char = nil
+
+    if settings.Aiming then
+
+        for i,v in next, dwEntities:GetChildren() do 
+
+            if v ~= dwLocalPlayer and
+            v.Character and
+            v.Character:FindFirstChild("HumanoidRootPart") and
+            v.Character:FindFirstChild("Humanoid") and
+            v.Character:FindFirstChild("Humanoid").Health > 0 then
+
+                if settings.Aimbot_TeamCheck == true and
+                v.Team ~= dwLocalPlayer.Team or
+                settings.Aimbot_TeamCheck == false then
+
+                    local char = v.Character
+                    local char_part_pos, is_onscreen = dwCamera:WorldToViewportPoint(char[settings.Aimbot_AimPart].Position)
+
+                    if is_onscreen then
+
+                        local mag = (Vector2.new(dwMouse.X, dwMouse.Y) - Vector2.new(char_part_pos.X, char_part_pos.Y)).Magnitude
+
+                        if mag < dist and mag < settings.Aimbot_FOV_Radius then
+
+                            dist = mag
+                            closest_char = char
+
+                        end
+                    end
+                end
+            end
+        end
+
+        if closest_char ~= nil and
+        closest_char:FindFirstChild("HumanoidRootPart") and
+        closest_char:FindFirstChild("Humanoid") and
+        closest_char:FindFirstChild("Humanoid").Health > 0 then
+
+            dwCamera.CFrame = CFrame.new(dwCamera.CFrame.Position, closest_char[settings.Aimbot_AimPart].Position)
+        end
+    end
+end)
+
+local watermark = Instance.new("ScreenGui")
+local _1 = Instance.new("Frame")
+local _2 = Instance.new("TextLabel")
+local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+local ImageLabel = Instance.new("ImageLabel")
+local UICorner = Instance.new("UICorner")
+local UICorner_2 = Instance.new("UICorner")
+
+watermark.Name = "watermark"
+watermark.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+watermark.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+watermark.ResetOnSpawn = false
+
+_1.Name = "1"
+_1.Parent = watermark
+_1.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+_1.BackgroundTransparency = 0.500
+_1.Position = UDim2.new(0.0799999982, 0, 0.0124688279, 0)
+_1.Size = UDim2.new(0.101347394, 0, 0.0423940159, 0)
+
+_2.Name = "2"
+_2.Parent = _1
+_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+_2.BackgroundTransparency = 1.000
+_2.Position = UDim2.new(0.225443944, 0, 0, 0)
+_2.Size = UDim2.new(0, 134, 0, 34)
+_2.Font = Enum.Font.IndieFlower
+_2.Text = "yuka is cute"
+_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+_2.TextSize = 30.000
+_2.TextWrapped = true
+
+UIAspectRatioConstraint.Parent = _1
+UIAspectRatioConstraint.AspectRatio = 5.088
+
+ImageLabel.Parent = _1
+ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageLabel.BackgroundTransparency = 1.000
+ImageLabel.Size = UDim2.new(0, 39, 0, 34)
+ImageLabel.Image = "http://www.roblox.com/asset/?id=9780881523"
+
+UICorner.CornerRadius = UDim.new(0.100000001, 8)
+UICorner.Parent = ImageLabel
+
+UICorner_2.CornerRadius = UDim.new(0.100000001, 8)
+UICorner_2.Parent = _1
+
+sG:SetCore("SendNotification", {
+	Title = "is all done",
+	Text = "nina is cutest",
+	Icon = "https://www.roblox.com/asset/?id=9780881543",
+	Button1 = "close",
+	Duration = 10
+})
